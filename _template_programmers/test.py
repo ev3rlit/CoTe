@@ -9,7 +9,18 @@ import sys
 from pathlib import Path
 
 # 프로젝트 루트의 _runners 모듈을 import
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# 폴더 구조에 상관없이 _runners 폴더가 있는 루트를 찾음
+def find_project_root(start_path: Path, marker: str = "_runners") -> Path:
+    """상위 디렉토리를 탐색하여 marker 폴더가 있는 루트를 찾음"""
+    current = start_path
+    while current != current.parent:  # 파일시스템 루트에 도달할 때까지
+        if (current / marker).is_dir():
+            return current
+        current = current.parent
+    raise FileNotFoundError(f"프로젝트 루트를 찾을 수 없습니다. '{marker}' 폴더가 필요합니다.")
+
+project_root = find_project_root(Path(__file__).parent)
+sys.path.insert(0, str(project_root))
 from _runners import run_tests
 
 # ============================================================
