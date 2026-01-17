@@ -320,6 +320,138 @@ for i in range(1, n+1):
 
 ---
 
+## 9. 🔄 Top-Down 풀이 (메모이제이션 + 재귀)
+
+### Bottom-Up vs Top-Down 비교
+
+| 항목 | Bottom-Up | Top-Down |
+|------|-----------|----------|
+| **방향** | 시작점(1,1) → 목적지(n,m) | 목적지(n,m) → 시작점(1,1) |
+| **구현** | 반복문 | 재귀 + 메모이제이션 |
+| **사고 방식** | "작은 문제부터 쌓아 올리기" | "큰 문제를 작은 문제로 쪼개기" |
+| **장점** | 스택 오버플로우 없음 | 직관적인 점화식 표현 |
+| **단점** | 순회 순서 고려 필요 | 재귀 깊이 제한 (Python 기본 1000) |
+
+### Top-Down 핵심 아이디어
+
+> **"(n, m)에 도달하는 경로 수를 구하려면, (n-1, m)과 (n, m-1)에서 오는 경로 수를 더하면 된다"**
+
+```
+dp(y, x) = "시작점(1,1)에서 (y, x)까지 도달하는 경로 수"
+
+dp(y, x) = dp(y-1, x) + dp(y, x-1)  (재귀 호출)
+```
+
+### Top-Down 구현
+
+```python
+import sys
+sys.setrecursionlimit(10001)  # 100×100 격자 대비
+
+def solution(m, n, puddles):
+    MOD = 1_000_000_007
+    
+    # 물웅덩이 좌표 변환 (x, y) → (y, x)
+    puddle_set = {(y, x) for x, y in puddles}
+    
+    # 메모이제이션 딕셔너리
+    memo = {}
+    
+    def dp(y, x):
+        # 1. Base Case: 범위 벗어남
+        if y < 1 or x < 1:
+            return 0
+        
+        # 2. Base Case: 물웅덩이
+        if (y, x) in puddle_set:
+            return 0
+        
+        # 3. Base Case: 시작점
+        if y == 1 and x == 1:
+            return 1
+        
+        # 4. 이미 계산된 값 반환 (메모이제이션)
+        if (y, x) in memo:
+            return memo[(y, x)]
+        
+        # 5. 점화식: 위에서 오는 경우 + 왼쪽에서 오는 경우
+        result = (dp(y - 1, x) + dp(y, x - 1)) % MOD
+        memo[(y, x)] = result
+        
+        return result
+    
+    return dp(n, m)
+```
+
+### 실행 흐름 예시 (3×3 격자)
+
+```
+dp(3, 3) 호출
+├── dp(2, 3) 호출
+│   ├── dp(1, 3) → dp(1, 2) + dp(0, 3) = 1 + 0 = 1
+│   └── dp(2, 2) 호출
+│       ├── dp(1, 2) → 1 (메모)
+│       └── dp(2, 1) → 1
+│       → 2
+│   → 1 + 2 = 3
+└── dp(3, 2) 호출
+    ├── dp(2, 2) → 2 (메모이제이션!)
+    └── dp(3, 1) → 1
+    → 2 + 1 = 3
+→ 3 + 3 = 6
+```
+
+### ⚠️ Top-Down 사용 시 주의사항
+
+1. **재귀 깊이 제한**
+   - Python 기본값: 1000
+   - 100×100 격자 → 최악의 경우 약 200번 재귀
+   - `sys.setrecursionlimit(10001)` 설정 권장
+
+2. **메모이제이션 필수**
+   - 없으면 중복 계산으로 시간 초과
+   - `@lru_cache` 데코레이터 활용 가능
+
+3. **이 문제에서는 Bottom-Up 권장**
+   - 격자 크기가 크지 않아 큰 차이 없음
+   - 하지만 Bottom-Up이 더 직관적이고 안전
+
+### `@lru_cache` 활용 버전 (더 간결)
+
+```python
+from functools import lru_cache
+import sys
+sys.setrecursionlimit(10001)
+
+def solution(m, n, puddles):
+    MOD = 1_000_000_007
+    puddle_set = {(y, x) for x, y in puddles}
+    
+    @lru_cache(maxsize=None)
+    def dp(y, x):
+        if y < 1 or x < 1:
+            return 0
+        if (y, x) in puddle_set:
+            return 0
+        if y == 1 and x == 1:
+            return 1
+        return (dp(y - 1, x) + dp(y, x - 1)) % MOD
+    
+    return dp(n, m)
+```
+
+### 언제 Top-Down을 선택할까?
+
+| 상황 | 추천 |
+|------|------|
+| 모든 상태를 계산해야 함 | Bottom-Up |
+| 일부 상태만 필요 | **Top-Down** |
+| 상태 전이 순서가 복잡 | **Top-Down** |
+| 재귀 깊이가 깊음 (>10000) | Bottom-Up |
+| 점화식이 직관적으로 떠오름 | **Top-Down** |
+
+---
+
 # 평가
 
 ## 개선할 점
