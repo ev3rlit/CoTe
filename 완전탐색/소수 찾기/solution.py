@@ -1,13 +1,21 @@
 from itertools import permutations
 
+prime_cache = set()
+
 def is_prime(number):
     # 0과 1은 소수가 아니므로 제외
     if number < 2:
         return False
+
+    if number in prime_cache:
+        return True
     
     for i in range(2, int(number**0.5)+1):
         if number % i == 0:
             return False
+
+    prime_cache.add(number)
+
     return True
 
 def concat_number(numbers):
