@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사칙연산 DP 시각화 (Arithmetic Operations DP)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #8b5cf6;
+            --secondary-color: #6366f1;
+            --accent-color: #ec4899;
+            --text-color: #f8fafc;
+            --subtext-color: #94a3b8;
+            --border-color: #334155;
+            --cell-size: 60px;
+            --max-cell-size: 80px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Layout */
+        header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        h1 .badge {
+            font-size: 0.75rem;
+            background: var(--primary-color);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .content {
+            flex: 1;
+            background: #131c2e; /* Slightly lighter than bg */
+            position: relative;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Controls & Input */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--subtext-color);
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--border-color);
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto; /* Push to bottom of sidebar */
+        }
+        
+        .playback-controls button {
+            flex: 1;
+            padding: 0.5rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+        }
+
+        /* Visualization Elements */
+        .step-info {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            min-height: 150px;
+        }
+        
+        .step-info .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .dp-container {
+            display: grid;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+            justify-content: center;
+        }
+        
+        .tables-wrapper {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .table-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .table-title.min {
+            color: var(--accent-color);
+        }
+
+        .dp-table {
+            display: grid;
+            gap: 2px;
+            background: var(--border-color); /* Grid lines color */
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .dp-cell {
+            background: var(--surface-color);
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            position: relative;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .dp-cell.header {
+            background: #2d3b55;
+            font-weight: bold;
+            color: var(--subtext-color);
+            font-size: 0.8rem;
+        }
+
+        .dp-cell.active {
+            background: rgba(139, 92, 246, 0.3);
+            border: 2px solid var(--primary-color);
+            z-index: 2;
+        }
+        
+        .dp-cell.target {
+            background: rgba(236, 72, 153, 0.3);
+            border: 2px solid var(--accent-color);
+            z-index: 2;
+        }
+
+        .dp-cell.checking {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dp-cell span {
+            z-index: 1;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: #000;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            bottom: -20px;
+            display: none;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        .dp-cell:hover .tooltip {
+            display: block;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Micro Interactions */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            사칙연산 <span class="badge">DP</span>
+        </h1>
+        <div style="font-size: 0.9rem; color: var(--subtext-color);">
+            Level 4 | Interval DP
+        </div>
+    </header>
+
+    <div class="processing-overlay" id="loading" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; justify-content:center; align-items:center;">
+        <div style="color:white;">Processing...</div>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <main>
+        <aside class="sidebar">
+            <div class="control-group">
+                <label>수식 입력 (숫자와 연산자는 공백 구분)</label>
+                <input type="text" id="expressionInput" value="1 - 3 + 5 - 8" placeholder="예: 1 - 3 + 5 - 8">
+                <button class="btn" onclick="startVisualization()">시각화 시작</button>
+            </div>
+            
+            <div class="step-info" id="stepInfo">
+                <div style="color: #64748b; text-align: center; margin-top: 2rem;">
+                    수식을 입력하고 '시각화 시작'을 누르세요.
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-top: auto;">
+                <label>재생 속도 (x<span id="speedLabel">1</span>)</label>
+                <input type="range" id="speedRange" min="1" max="50" value="5" oninput="updateSpeed(this.value)">
+            </div>
+            
+            <div class="playback-controls">
+                <button class="btn btn-outline" onclick="prevStep()">Example: ⏮</button>
+                <button class="btn btn-outline" onclick="togglePlay()" id="playBtn">▶</button>
+                <button class="btn btn-outline" onclick="nextStep()">⏭</button>
+            </div>
+            <div style="text-align: center; font-size: 0.8rem; color: var(--subtext-color);">
+                Step: <span id="currentStep">0</span> / <span id="totalSteps">0</span>
+            </div>
+        </aside>
+
+        <section class="content">
+            <div class="dp-container" id="dpContainer" style="display: none;">
+                <div class="tables-wrapper">
+                    <div class="table-section">
+                        <div class="table-title">MAX Table</div>
+                        <div id="maxTable" class="dp-table"></div>
+                    </div>
+                    <div class="table-section">
+                        <div class="table-title min">MIN Table</div>
+                        <div id="minTable" class="dp-table"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- Algorithm & Logic ---
+
+        let history = []; // Stores state snapshots
+        let currentIndex = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let playSpeed = 200; // ms
+
+        // Parse input string "1 - 3 + 5" -> nums=[1,3,5], ops=['-','+']
+        function parseInput(str) {
+            const tokens = str.trim().split(/\s+/);
+            const nums = [];
+            const ops = [];
+            
+            for (let i = 0; i < tokens.length; i++) {
+                if (i % 2 === 0) {
+                    const num = parseInt(tokens[i]);
+                    if (isNaN(num)) throw new Error("Invalid number at index " + i);
+                    nums.push(num);
+                } else {
+                    if (tokens[i] !== '+' && tokens[i] !== '-') throw new Error("Invalid operator at index " + i);
+                    ops.push(tokens[i]);
+                }
+            }
+            return { nums, ops };
+        }
+
+        // Core DP Algorithm that records history
+        function runAlgorithm(nums, ops) {
+            const n = nums.length;
+            const steps = [];
+            const INF = Infinity; // Using standard Infinity for logic
+            
+            // Initialize tables with placeholders
+            // We use null to represent uncomputed cells initially for visualization clarity
+            let dpMax = Array.from({ length: n }, () => Array(n).fill(null));
+            let dpMin = Array.from({ length: n }, () => Array(n).fill(null));
+
+            // Helper to record a step
+            const recordStep = (type, i, j, k, msg, highlightCells = []) => {
+                steps.push({
+                    type, // 'init', 'check', 'update', 'finish'
+                    dpMax: JSON.parse(JSON.stringify(dpMax)),
+                    dpMin: JSON.parse(JSON.stringify(dpMin)),
+                    i, j, k,
+                    message: msg,
+                    highlight: highlightCells // Array of {r, c, type}
+                });
+            };
+
+            // 1. Initialization
+            for (let i = 0; i < n; i++) {
+                dpMax[i][i] = nums[i];
+                dpMin[i][i] = nums[i];
+                recordStep('init', i, i, null, `초기화: 숫자 개별 구간 [${i}, ${i}] = ${nums[i]}`, [{r: i, c: i, type: 'active'}]);
+            }
+
+            // 2. Interval DP
+            for (let len = 2; len <= n; len++) { // len: 구간 길이 (2 ~ n)
+                for (let i = 0; i <= n - len; i++) {
+                    let j = i + len - 1;
+                    
+                    // Init cell for calculation
+                    dpMax[i][j] = -INF;
+                    dpMin[i][j] = INF;
+                    
+                    recordStep('focus', i, j, null, `구간 [${i}, ${j}] 계산 시작 (길이: ${len})`, [{r: i, c: j, type: 'active'}]);
+
+                    for (let k = i; k < j; k++) {
+                        const op = ops[k];
+                        
+                        // Current candidates
+                        let maxVal, minVal;
+                        let formula = "";
+                        
+                        // Prepare highlight for operands
+                        const highlights = [
+                            {r: i, c: j, type: 'active'},
+                            {r: i, c: k, type: 'checking'},
+                            {r: k+1, c: j, type: 'checking'}
+                        ];
+
+                        if (op === '+') {
+                            const v1 = dpMax[i][k] + dpMax[k+1][j];
+                            const v2 = dpMin[i][k] + dpMin[k+1][j];
+                            
+                            maxVal = v1;
+                            minVal = v2; // For + operator, min is min+min
+                            
+                            formula = `분할위치 k=${k} (${op}): <br>
+                                      Max = Max[${i}][${k}] + Max[${k+1}][${j}] = ${dpMax[i][k]} + ${dpMax[k+1][j]} = ${v1} <br>
+                                      Min = Min[${i}][${k}] + Min[${k+1}][${j}] = ${dpMin[i][k]} + ${dpMin[k+1][j]} = ${v2}`;
+                        } else { // op === '-'
+                            // Max = Max - Min
+                            const v1 = dpMax[i][k] - dpMin[k+1][j]; 
+                            // Min = Min - Max
+                            const v2 = dpMin[i][k] - dpMax[k+1][j];
+                            
+                            // 뺄셈의 경우 Max를 만들기 위해 Max-Min, Min-Min 등 여러 조합이 가능하지만
+                            // 일반적으로 Max-Min이 최대, Min-Max가 최소임.
+                            // 하지만 안전하게 모든 조합을 고려하는 것이 정석일 수 있으나
+                            // 문제 로직상:
+                            // Max(A-B) = Max(A) - Min(B)
+                            // Min(A-B) = Min(A) - Max(B)
+                            
+                            maxVal = v1;
+                            minVal = v2;
+
+                            formula = `분할위치 k=${k} (${op}): <br>
+                                      Max = Max[${i}][${k}] - Min[${k+1}][${j}] = ${dpMax[i][k]} - ${dpMin[k+1][j]} = <b>${v1}</b> <br>
+                                      Min = Min[${i}][${k}] - Max[${k+1}][${j}] = ${dpMin[i][k]} - ${dpMax[k+1][j]} = <b>${v2}</b>`;
+                        }
+
+                        // Comparisons
+                        let updateMsg = formula;
+                        let updated = false;
+
+                        if (maxVal > dpMax[i][j]) {
+                            dpMax[i][j] = maxVal;
+                            updateMsg += `<br><span class="highlight">Max 갱신! ${maxVal}</span>`;
+                            updated = true;
+                        }
+                        if (minVal < dpMin[i][j]) {
+                            dpMin[i][j] = minVal;
+                            updateMsg += `<br><span class="highlight">Min 갱신! ${minVal}</span>`;
+                            updated = true;
+                        }
+
+                        recordStep('check', i, j, k, updateMsg, highlights);
+                    }
+                    
+                    recordStep('update', i, j, null, `구간 [${i}, ${j}] 최종 결정: Max=${dpMax[i][j]}, Min=${dpMin[i][j]}`, [{r: i, c: j, type: 'target'}]);
+                }
+            }
+
+            // Final Result
+            recordStep('finish', 0, n-1, null, `최종 결과: ${dpMax[0][n-1]}`, [{r: 0, c: n-1, type: 'target'}]);
+
+            return steps;
+        }
+
+        // --- DOM Control ---
+        
+        function initGrid(n) {
+            const maxTable = document.getElementById('maxTable');
+            const minTable = document.getElementById('minTable');
+            
+            // CSS Grid Template
+            const template = `repeat(${n}, var(--cell-size))`;
+            maxTable.style.gridTemplateColumns = template;
+            minTable.style.gridTemplateColumns = template;
+            
+            maxTable.innerHTML = '';
+            minTable.innerHTML = '';
+
+            for (let r = 0; r < n; r++) {
+                for (let c = 0; c < n; c++) {
+                    // Max Cell
+                    const d1 = document.createElement('div');
+                    d1.className = 'dp-cell';
+                    d1.id = `max-${r}-${c}`;
+                    if (r > c) d1.style.backgroundColor = 'transparent'; // Lower triangle
+                    
+                    // Min Cell
+                    const d2 = document.createElement('div');
+                    d2.className = 'dp-cell';
+                    d2.id = `min-${r}-${c}`;
+                    if (r > c) d2.style.backgroundColor = 'transparent';
+                    
+                    // Only add tooltips/content to valid cells
+                    if (r <= c) {
+                        d1.innerHTML = `<span></span><div class="tooltip">[${r},${c}]</div>`;
+                        d2.innerHTML = `<span></span><div class="tooltip">[${r},${c}]</div>`;
+                    }
+
+                    maxTable.appendChild(d1);
+                    minTable.appendChild(d2);
+                }
+            }
+        }
+
+        function renderState(index) {
+            if (index < 0 || index >= history.length) return;
+            const state = history[index];
+            
+            // 1. Text Info
+            document.getElementById('stepInfo').innerHTML = state.message;
+            document.getElementById('currentStep').innerText = index + 1;
+            
+            // 2. Progress Bar
+            const pct = ((index + 1) / history.length) * 100;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+
+            // 3. Update Tables values
+            // We use the state's dpMax/dpMin snapshot
+            const n = state.dpMax.length;
+            
+            // Clear previous highlights
+            document.querySelectorAll('.dp-cell').forEach(el => {
+                el.classList.remove('active', 'checking', 'target', 'pulse');
+                // restore values from snapshot
+                const [type, r, c] = el.id.split('-');
+                const row = parseInt(r);
+                const col = parseInt(c);
+                if (row <= col) {
+                    const val = type === 'max' ? state.dpMax[row][col] : state.dpMin[row][col];
+                    const span = el.querySelector('span');
+                    // Show INF as ∞ or empty
+                    if (val === null) span.innerText = '';
+                    else if (val === Infinity) span.innerText = '∞';
+                    else if (val === -Infinity) span.innerText = '-∞';
+                    else span.innerText = val;
+                }
+            });
+
+            // 4. Apply Highlights
+            if (state.highlight) {
+                state.highlight.forEach(h => {
+                    const types = ['max', 'min'];
+                    types.forEach(t => {
+                        const cell = document.getElementById(`${t}-${h.r}-${h.c}`);
+                        if (cell) {
+                            cell.classList.add(h.type);
+                            if (h.type === 'target') cell.classList.add('pulse');
+                        }
+                    });
+                });
+            }
+        }
+
+        function startVisualization() {
+            // Stop existing play
+            stopPlay();
+
+            // 1. Get Input
+            const inputStr = document.getElementById('expressionInput').value;
+            
+            try {
+                const { nums, ops } = parseInput(inputStr);
+                
+                // 2. Setup Grid
+                initGrid(nums.length);
+                document.getElementById('dpContainer').style.display = 'flex';
+                
+                // 3. Run Algo
+                history = runAlgorithm(nums, ops);
+                document.getElementById('totalSteps').innerText = history.length;
+                currentIndex = 0;
+                
+                // 4. Render Initial
+                renderState(0);
+                
+            } catch (e) {
+                alert("입력 오류: " + e.message);
+                console.error(e);
+            }
+        }
+
+        // --- Playback Controls ---
+
+        function updateSpeed(val) {
+            // Slider 1 (slow) ~ 50 (fast)
+            // maps to 1000ms ~ 20ms
+            // Logarithmic scale might be better but linear is fine for simple demo
+            const speed = 1000 / val; 
+            playSpeed = speed;
+            document.getElementById('speedLabel').innerText = val;
+            
+            // If playing, restart interval with new speed
+            if (isPlaying) {
+                stopPlay();
+                startPlay();
+            }
+        }
+
+        function nextStep() {
+            if (currentIndex < history.length - 1) {
+                currentIndex++;
+                renderState(currentIndex);
+            } else {
+                stopPlay();
+            }
+        }
+
+        function prevStep() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderState(currentIndex);
+            }
+        }
+
+        function togglePlay() {
+            if (isPlaying) stopPlay();
+            else startPlay();
+        }
+
+        function startPlay() {
+            if (currentIndex >= history.length - 1) currentIndex = 0; // Restart if at end
+            isPlaying = true;
+            document.getElementById('playBtn').innerText = '⏸';
+            playInterval = setInterval(nextStep, playSpeed);
+        }
+
+        function stopPlay() {
+            isPlaying = false;
+            document.getElementById('playBtn').innerText = '▶';
+            clearInterval(playInterval);
+        }
+        
+        // Auto-start for demo
+        // window.onload = startVisualization;
+
+    </script>
+</body>
+</html>
