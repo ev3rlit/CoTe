@@ -147,6 +147,10 @@ def simulate(board, commands):
 **추천 문제**:
 - 백준 14503: 로봇 청소기
 - 백준 14499: 주사위 굴리기
+- **[프로그래머스]**
+  - Lv1: 공원 산책 (기본 방향 이동)
+  - Lv2: 리코쳇 로봇 (미끄러지는 이동)
+  - Lv3: 블록 이동하기 (회전 포함 복잡 이동)
 
 ```python
 def robot_cleaner(room, start_r, start_c, start_d):
@@ -201,6 +205,9 @@ def robot_cleaner(room, start_r, start_c, start_d):
 **핵심 변화**: deque로 몸통 좌표 관리, 충돌 검사
 **추천 문제**:
 - 백준 3190: 뱀
+- **[프로그래머스]**
+  - Lv2: 다리를 지나는 트럭 (1D 큐 시뮬레이션)
+  - Lv3: 경주로 건설 (비용 계산 포함 bfs)
 
 ```python
 from collections import deque
@@ -269,6 +276,9 @@ def snake_game(n, apples, turns):
 **추천 문제**:
 - 백준 16234: 인구 이동
 - 백준 14891: 톱니바퀴
+- **[프로그래머스]**
+  - Lv2: 프렌즈4블록 (블록 삭제 + 중력 작용)
+  - Lv3: 기둥과 보 설치 (설치/삭제 후 일관성 검사)
 
 ```python
 def simultaneous_update(board, steps):

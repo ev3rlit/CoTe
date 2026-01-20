@@ -1,8 +1,10 @@
 """
-테스트 케이스 정의 (프로그래머스 입출력 예시)
+테스트 케이스 정의 (백준 입출력 예시)
 
 각 문제마다 test_cases 배열만 수정하면 됩니다.
 테스트 실행 로직은 프로젝트 루트의 _runners 폴더에서 관리합니다.
+
+추가로 testcases/ 폴더에 .in/.out 파일을 넣으면 자동으로 로드됩니다.
 """
 
 import sys
@@ -21,47 +23,74 @@ def find_project_root(start_path: Path, marker: str = "_runners") -> Path:
 
 project_root = find_project_root(Path(__file__).parent)
 sys.path.insert(0, str(project_root))
-from _runners import run_tests
+from _runners import run_boj_tests
 
 # ============================================================
 # 테스트 케이스 정의 (문제별로 수정하는 부분)
 # ============================================================
 test_cases = [
-    # 여러 매개변수: 튜플 사용 (언팩됨)
-    # {
-    #     "name": "테스트케이스",
-    #     "input": (1, 2, 3),  # 튜플 = solution(1, 2, 3)으로 호출
-    #     "expected": 6,
-    # },
-
-    # 단일 매개변수: 리스트, 문자열, 숫자 등 (그대로 전달)
     {
-        "name": "테스트케이스 1",
-        "input": (10,2),
-        "expected": [4,3],
+        "name": "예제 1",
+        "input": """3
+26 40 83
+49 60 57
+13 89 99
+""",
+        "expected": """110
+""",
     },
     {
-        "name": "테스트케이스 2",
-        "input": (8,1), 
-        "expected": [3,3],
+        "name": "예제 2",
+        "input": """3
+1 100 100
+100 1 100
+100 100 1
+""",
+        "expected": """3
+""",
     },
     {
-        "name": "테스트케이스 3",
-        "input": (24,24),  
-        "expected": [8,6],
-    } 
-    # 아래에 추가
+        "name": "예제 3",
+        "input": """3
+1 100 100
+100 100 100
+1 100 100
+""",
+        "expected": """201
+""",
+    },
+    {
+        "name": "예제 4",
+        "input": """6
+30 19 5
+64 77 64
+15 19 97
+4 71 57
+90 86 84
+93 32 91
+""",
+        "expected": """208
+""",
+    },
+    {
+        "name": "예제 5",
+        "input": """8
+71 39 44
+32 83 55
+51 37 63
+89 29 100
+83 58 11
+65 13 15
+47 25 29
+60 66 19
+""",
+        "expected": """253
+""",
+    },
 ]
-
-from solution import solution
 
 # ============================================================
 # 테스트 실행 (수정 금지)
 # ============================================================
 if __name__ == "__main__":
-    run_tests(solution, test_cases)
-
-    # 다른 구현으로 테스트하려면:
-    # def my_solution(nums):
-    #     return sorted(nums)
-    # run_tests(my_solution, test_cases)
+    run_boj_tests(test_cases)
