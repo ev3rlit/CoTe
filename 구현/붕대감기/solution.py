@@ -49,8 +49,6 @@ def solution(bandage, health, attacks):
             cast_elapsed = 0
             continue
             
-        
-
         # 붕대 감기
         cast_elapsed += 1
         total_value = increase
