@@ -1,54 +1,62 @@
-from heapq import heappush, heappop
+# 초기 접근 방법은 최소 비용이므로 BFS로 풀었으나
+# 이동 경로마다 가중치가 다르므로 BFS 접근으로는 도착 지점이 최소일수가 없음
+# 다익스트라 방법을 이용해야 문제를 풀 수 있었음.
+
+# 위치별 이동 방향에 따라 비용이 다다름
+# 최소 비용 가지치기를 해야함
+
+# 다음 비용 계산은  직전 방향과 다음으로 이동할 방향이 다르면 코너 비용 추가함
+
+from heapq import heappop, heappush
 
 def solution(board):
-    N = len(board)
-    # 상, 하, 좌, 우
-    dy = [-1, 1, 0, 0]
-    dx = [0, 0, -1, 1]
     
-    # 3차원 비용 배열: costs[y][x][direction]
-    # direction: 0:상, 1:하, 2:좌, 3:우
+    N = len(board)
+    dirs = [(-1,0),(0,1),(1,0),(0,-1)]
     INF = float('inf')
-    costs = [[[INF] * 4 for _ in range(N)] for _ in range(N)]
+    
+    costs = {}
+    for y in range(N):
+        for x in range(N):
+            for (dy,dx) in dirs:
+                costs[(y,x,dy,dx)] = INF
     
     pq = []
-    
-    # 시작점 초기화
-    # 시작점에서는 방향이 없으므로, 이동 가능한 방향(하, 우)으로 초기 비용을 넣고 시작
-    # (0,0)은 항상 0이므로, (0,0)에서 출발하는 것으로 처리
     if board[0][0] == 0:
-        for i in range(4):
-            costs[0][0][i] = 0
-        heappush(pq, (0, 0, 0, -1)) # cost, y, x, prev_dir (-1은 시작점 표시)
-
-    min_cost = INF
-
-    while pq:
-        curr_cost, y, x, prev_dir = heappop(pq)
-        
-        # 도착점 도달 시 최소 비용 갱신 (다익스트라라 처음 도착이 최소일 수 있지만, 방향 때문에 끝까지 확인)
-        if y == N - 1 and x == N - 1:
-            min_cost = min(min_cost, curr_cost)
-            continue
-            
-        # 4방향 이동
-        for i in range(4):
-            ny, nx = y + dy[i], x + dx[i]
-            
-            # 범위 및 벽 체크
-            if 0 <= ny < N and 0 <= nx < N and board[ny][nx] == 0:
-                # 비용 계산: 기본 100원
-                new_cost = curr_cost + 100
-                
-                # 코너 비용 추가 (시작점이 아니고, 방향이 다르면)
-                if prev_dir != -1 and prev_dir != i:
-                    new_cost += 500
-                
-                # 최소 비용 갱신 조건
-                # 해당 방향으로 들어오는 비용이 더 작을 때만 갱신
-                if new_cost < costs[ny][nx][i]:
-                    costs[ny][nx][i] = new_cost
-                    heappush(pq, (new_cost, ny, nx, i))
+        for (dy,dx) in dirs:
+            costs[(0,0,dy,dx)] = 0
+        # 비용, y,x, prev_dir(-1은 시작)
+        heappush(pq, (0,0,0,0,0))
     
-    # 도착점의 4방향 비용 중 최솟값 반환 (혹은 while문 내 min_cost)
-    return min(costs[N-1][N-1])
+    min_cost = INF
+    
+    while pq:
+        cost, y,x, prev_dy,prev_dx = heappop(pq)
+        
+        if (y,x) == (N-1,N-1):
+            min_cost = min(min_cost, cost)
+            continue
+        
+        # 4방향 이동
+        for (dy,dx) in dirs:
+            ny,nx = y + dy, x + dx
+            
+            # 경계
+            if not(0 <= ny < N and 0 <= nx < N):
+                continue
+            
+            # 벽
+            if board[ny][nx] == 1:
+                continue
+                
+            # 비용 계산
+            next_cost = cost + 100
+            if (0,0) != (prev_dy,prev_dx) and (dy,dx) != (prev_dy,prev_dx):
+                next_cost += 500
+                
+            # 최소 비용 갱신
+            if next_cost < costs[(ny,nx,dy,dx)]:
+                costs[(ny,nx,dy,dx)] = next_cost
+                heappush(pq,(next_cost,ny,nx,dy,dx))
+    
+    return min_cost
