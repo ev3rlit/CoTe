@@ -17,36 +17,24 @@
 # - 기준일자로 부터 수집일자 일 수 계산 = 경과일수
 # - 총일수 - 경과일수 >= 유효일수 보다 큰 경우 제거 대상
 
-def get_days(a):
-    a_year,a_month,a_day = a
-    b_year,b_month,b_day = (2000, 1, 1)
-    
-    days = 0
-    
-    days += (a_year - b_year) * 336
-    days += (a_month - b_month) * 28
-    days += (a_day - b_day)
-    
-    return days
-
-def to_date(a):
-    return tuple(map(int,a.split('.')))
+def get_days(date_str):
+    year,month,day = map(int,date_str.split('.'))
+    return year * 336 + month * 28 + day
 
 def solution(today, terms, privacies):
     answer = []
     
     # 1. 상태 초기화
     terms_map = {term : int(month) * 28 for (term, month) in map(str.split, terms)}
-    total_days = get_days(to_date(today))
+    total_days = get_days(today)
     
     # 2. 순회
     for (i, privacy) in enumerate(privacies):
         created_at, term = privacy.split()
-        created_at = to_date(created_at)
-        elapsed = get_days(created_at)
+        collected_days = get_days(created_at)
         
         duration = terms_map[term]
-        if total_days - elapsed >= duration:
+        if total_days - collected_days >= duration:
             answer.append(i+1)
             
     return sorted(answer)
