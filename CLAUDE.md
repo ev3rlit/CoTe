@@ -20,18 +20,17 @@ keyword(topic) : 한글 설명
 
 ### Single Problem Commit
 ```
-add(001_해시) : 두개뽑아서더하기 문제 풀이
-fix(003_스택) : 올바른괄호 문제 풀이 버그 수정
-update(010_DP) : N으로표현 풀이 최적화 (O(n²) → O(n))
+add(해시) : 완주하지못한선수 문제 풀이
+fix(스택) : 올바른괄호 문제 풀이 버그 수정
+update(DP) : N으로표현 풀이 최적화 (O(n²) → O(n))
 ```
 
 ### Multiple Changes in One Commit
 ```
 add(updates) : 여러 문제 풀이 및 문서 업데이트
 
-- 001_해시_두개뽑아서더하기 문제 풀이 추가
-- 002_해시_완주하지못한선수 문제 풀이 추가
-- 003_스택_올바른괄호 문제 풀이 추가
+- 해시/Programmers/완주하지못한선수 문제 풀이 추가
+- 스택/Programmers/올바른괄호 문제 풀이 추가
 - 메인 README.md 인덱스 테이블 업데이트
 ```
 
@@ -39,7 +38,7 @@ add(updates) : 여러 문제 풀이 및 문서 업데이트
 ✅ **DO**:
 - 키워드는 **영어** (add, fix, update, docs, refactor)
 - 한줄 설명과 본문 리스트는 **한글**
-- 문제 번호와 주제 명시 예: `001_해시`, `010_DP`
+- 알고리즘 유형 명시 예: `해시`, `DP`, `스택`
 - 의미 있는 설명 작성 (예: 최적화 전후 복잡도 언급)
 
 ❌ **DON'T**:
@@ -50,13 +49,13 @@ add(updates) : 여러 문제 풀이 및 문서 업데이트
 ### Commit Examples
 ```bash
 # 새 문제 풀이
-git commit -m "add(001_해시) : 두개뽑아서더하기 문제 풀이"
+git commit -m "add(해시) : 완주하지못한선수 문제 풀이"
 
 # 버그 수정
-git commit -m "fix(005_정렬) : 가장큰수 풀이 오류 수정"
+git commit -m "fix(정렬) : 가장큰수 풀이 오류 수정"
 
 # 성능 개선
-git commit -m "update(010_DP) : N으로표현 풀이 메모이제이션으로 최적화"
+git commit -m "update(DP) : N으로표현 풀이 메모이제이션으로 최적화"
 
 # 문서 수정
 git commit -m "docs : CLAUDE.md 커밋 메시지 규칙 추가"
@@ -64,9 +63,9 @@ git commit -m "docs : CLAUDE.md 커밋 메시지 규칙 추가"
 # 여러 문제 한번에 추가
 git commit -m "add(problems) : 해시 주제 3문제 풀이 추가
 
-- 001_해시_두개뽑아서더하기
-- 002_해시_완주하지못한선수
-- 003_해시_전화번호목록"
+- 해시/Programmers/두개뽑아서더하기
+- 해시/Programmers/완주하지못한선수
+- 해시/Programmers/전화번호목록"
 ```
 
 ---
@@ -84,7 +83,8 @@ git commit -m "add(problems) : 해시 주제 3문제 풀이 추가
 ### Key Characteristics
 - **Language**: Python 3
 - **Documentation**: Korean
-- **Structure**: Template-based folder organization with problem-per-folder approach
+- **Structure**: `유형/플랫폼/문제명` 계층 구조 (알고리즘 유형 → 플랫폼 → 문제)
+- **Multi-platform**: Programmers, Baekjoon (BOJ), LeetCode 지원
 - **No external dependencies**: Standalone pure Python implementations
 - **Git-based tracking**: Each problem is a commit checkpoint
 
@@ -93,6 +93,7 @@ git commit -m "add(problems) : 해시 주제 3문제 풀이 추가
 ### Main Files
 - `README.md` - Project overview, problem index table, and learning statistics
 - `CLAUDE.md` - This guidance file (for AI assistants)
+- `AGENTS.md` - Symbolic link to CLAUDE.md (for other AI agents)
 - `LICENSE` - Project license
 - `.gitignore` - Python-specific ignore patterns
 
@@ -100,41 +101,83 @@ git commit -m "add(problems) : 해시 주제 3문제 풀이 추가
 
 ```
 CoTe/
-├── _runners/                            # Test execution environment (multi-language support)
-│   ├── __init__.py                      # Test runner package
-│   ├── python.py                        # Python test runner (time/memory measurement)
-│   └── (future: go.py, java.py, etc.)
-├── _template/                           # Reusable template for new problems
-│   ├── README.md                        # Problem documentation template
-│   ├── solution.py                      # Code solution template
-│   └── test.py                          # Test cases template (modify per problem, references _runners)
+├── _runners/                            # Test execution environment (multi-platform support)
+│   ├── __init__.py                      # Package init (exports run_tests, run_boj_tests, run_leetcode_tests)
+│   ├── python.py                        # Programmers test runner (함수 기반)
+│   ├── boj.py                           # Baekjoon test runner (stdin/stdout 기반)
+│   └── leetcode.py                      # LeetCode test runner (Solution 클래스 기반)
 │
-├── 001_해시_두개뽑아서더하기/
-│   ├── README.md                        # Problem record with approach & reflections
-│   ├── solution.py                      # Implementation (for Programmers submission)
-│   └── test.py                          # Test cases (modify per problem)
-│
-├── 002_해시_완주하지못한선수/
+├── _template_programmers/               # Programmers 문제 템플릿
 │   ├── README.md
-│   ├── solution.py
-│   └── test.py
+│   ├── solution.py                      # def solution(): ...
+│   └── test.py                          # run_tests 사용
 │
-└── NNN_주제_문제명/                      # Naming: {number}_{topic}_{problem}
-    ├── README.md
-    ├── solution.py
-    └── test.py
+├── _template_boj/                       # Baekjoon 문제 템플릿
+│   ├── README.md
+│   ├── solution.py                      # stdin/stdout 방식
+│   └── test.py                          # run_boj_tests 사용
+│
+├── _template_leetcode/                  # LeetCode 문제 템플릿
+│   ├── README.md
+│   ├── solution.py                      # class Solution: ...
+│   └── test.py                          # run_leetcode_tests 사용
+│
+├── _learning/                           # 알고리즘 학습 자료
+│
+├── 해시/                                # 알고리즘 유형별 최상위 폴더
+│   └── Programmers/                     # 플랫폼별 하위 폴더
+│       ├── 완주하지못한선수/             # 문제별 폴더
+│       │   ├── README.md
+│       │   ├── solution.py
+│       │   └── test.py
+│       ├── 베스트앨범/
+│       └── ...
+│
+├── DP/
+│   ├── Programmers/
+│   │   └── N으로 표현/
+│   ├── Baekjoon/
+│   │   └── 평범한배낭/
+│   └── LeetCode/
+│       └── 300-LongestIncreasingSubsequence/
+│
+└── 스택/
+    ├── Programmers/
+    │   └── 괄호짝맞추기/
+    └── Baekjoon/
+        └── 스택/
 ```
 
-### Naming Convention
-- **Number**: Sequential `001`, `002`, `003`... (incremental order of problems solved)
-- **Topic**: Algorithm category (해시, 스택, 정렬, DFS, BFS, DP, etc.)
-- **Problem Name**: Korean problem title
+### Folder Hierarchy
+```
+유형/플랫폼/문제명/
+```
 
-**Examples**:
-- `001_해시_두개뽑아서더하기/`
-- `002_해시_완주하지못한선수/`
-- `003_스택_올바른괄호/`
-- `010_DP_N으로표현/`
+- **유형** (Algorithm Category): 해시, 스택, 큐, 트리, DP, BFS, DFS, 구현, 완전탐색, 그래프 등
+- **플랫폼** (Platform): `Programmers`, `Baekjoon`, `LeetCode`
+- **문제명** (Problem Name):
+  - Programmers: 한글 문제명 (예: `완주하지못한선수`)
+  - Baekjoon: 한글 문제명 (예: `평범한배낭`)
+  - LeetCode: `번호-영문이름` (예: `300-LongestIncreasingSubsequence`)
+
+### Current Algorithm Categories
+
+| 카테고리 | Programmers | Baekjoon | LeetCode |
+|---------|------------|----------|----------|
+| 맛배기 | ✅ | | |
+| 스택 | ✅ | ✅ | |
+| 큐 | ✅ | | |
+| 해시 | ✅ | | |
+| 트리 | ✅ | | |
+| 이분탐색 | ✅ | | |
+| 순회 | | ✅ | |
+| 집합 | ✅ | | |
+| DP | ✅ | ✅ | ✅ |
+| BFS | ✅ | | |
+| DFS | ✅ | | |
+| 구현 | ✅ | | |
+| 그래프 | ✅ | ✅ | |
+| 완전탐색 | ✅ | | |
 
 ## Problem Documentation Template
 
@@ -169,24 +212,47 @@ Each problem's `README.md` follows this structure:
 ## Common Tasks
 
 ### Creating a New Problem
+
+#### Programmers
 ```bash
-# 1. Copy template folder with new number, topic, and problem name
-cp -r _template 001_해시_두개뽑아서더하기
-cd 001_해시_두개뽑아서더하기
+# 1. Copy template
+cp -r _template_programmers 해시/Programmers/전화번호목록
+cd 해시/Programmers/전화번호목록
 
-# 2. Add test cases to test.py
-# (Copy input/output examples from Programmers problem page)
-# test.py automatically references the root _runners package
-
-# 3. Run tests locally
+# 2. Add test cases to test.py → Run tests
 python3 test.py
 
-# 4. Implement solution in solution.py
-# 5. Edit README.md with problem approach and reflections
-# 6. Update main README.md table with new entry
-# 7. Commit changes
-git add .
-git commit -m "add(001_해시) : 두개뽑아서더하기 문제 풀이"
+# 3. Implement solution.py → Edit README.md
+# 4. Commit
+git commit -m "add(해시) : 전화번호목록 문제 풀이"
+```
+
+#### Baekjoon
+```bash
+# 1. Copy template
+cp -r _template_boj DP/Baekjoon/1로만들기
+cd DP/Baekjoon/1로만들기
+
+# 2. Add test cases to test.py → Run tests
+python3 test.py
+
+# 3. Implement solution.py → Edit README.md
+# 4. Commit
+git commit -m "add(DP) : 1로만들기 문제 풀이 (BOJ 1463)"
+```
+
+#### LeetCode
+```bash
+# 1. Copy template
+cp -r _template_leetcode DP/LeetCode/300-LongestIncreasingSubsequence
+cd DP/LeetCode/300-LongestIncreasingSubsequence
+
+# 2. Add test cases to test.py → Run tests
+python3 test.py
+
+# 3. Implement solution.py → Edit README.md
+# 4. Commit
+git commit -m "add(DP) : LIS 문제 풀이 (LeetCode 300)"
 ```
 
 ### File Responsibilities
@@ -194,12 +260,14 @@ git commit -m "add(001_해시) : 두개뽑아서더하기 문제 풀이"
 - **solution.py** (per problem): Problem solution (modify)
 - **README.md** (per problem): Problem documentation (modify)
 - **_runners/** (root, shared): Test execution environment
-  - `__init__.py`: Package initialization
-  - `python.py`: Python test runner (DO NOT modify, shared by all Python problems)
-  - (future) `go.py`, `java.py`: Other language runners
+  - `__init__.py`: Package initialization (exports all runners)
+  - `python.py`: Programmers runner — `run_tests(func, test_cases)` — **DO NOT modify**
+  - `boj.py`: Baekjoon runner — `run_boj_tests(...)` — **DO NOT modify**
+  - `leetcode.py`: LeetCode runner — `run_leetcode_tests(...)` — **DO NOT modify**
 
 ### Test Case Format
 
+#### Programmers (함수 기반)
 ```python
 test_cases = [
     # 여러 매개변수: 튜플 사용 (언팩됨)
@@ -215,11 +283,6 @@ test_cases = [
         "input": [1, 2, 3],      # 리스트 → solution([1, 2, 3])
         "expected": [1, 2, 3],
     },
-    {
-        "name": "단일 문자열",
-        "input": "hello",        # 문자열 → solution("hello")
-        "expected": "olleh",
-    },
 ]
 ```
 
@@ -229,19 +292,27 @@ test_cases = [
 
 ### Testing Locally
 ```bash
-cd NNN_주제_문제명
+cd 유형/플랫폼/문제명
 
-# Edit test_cases in test.py with Programmers examples
-# Then run (automatically uses root _runners/python.py):
+# test.py 실행 (자동으로 _runners 패키지 참조)
 python3 test.py
 
-# Output shows: ✓ 통과 or ✗ 실패, time, memory for each test case
+# Output: ✓ 통과 or ✗ 실패, time, memory for each test case
 ```
 
-### Submitting to Programmers
-1. Copy the `solution()` function from `solution.py`
-2. Paste into Programmers problem editor
-3. Submit
+### Submitting Solutions
+
+#### Programmers
+1. Copy `solution()` function from `solution.py`
+2. Paste into Programmers editor → Submit
+
+#### Baekjoon
+1. Copy entire `solution.py` (includes stdin/stdout handling)
+2. Paste into Baekjoon editor → Submit
+
+#### LeetCode
+1. Copy `Solution` class from `solution.py`
+2. Paste into LeetCode editor → Submit
 
 ### Updating Main README
 When adding new problems, update `/README.md`:
@@ -251,16 +322,22 @@ When adding new problems, update `/README.md`:
 
 ## Algorithm Categories
 
-Supported algorithm topics (by hashtag):
+Supported algorithm topics (mapped to folder names):
+- **#맛배기** - Introductory/warm-up problems
 - **#해시** - Hash/Dictionary-based problems
 - **#스택** **#큐** - Stack/Queue structures
-- **#정렬** - Sorting algorithms
-- **#DFS** **#BFS** **#이진탐색** - Search techniques
+- **#트리** - Tree structures (BST, traversal, etc.)
+- **#이분탐색** - Binary search
+- **#순회** - Iteration/traversal
+- **#집합** - Set operations (Union-Find, etc.)
 - **#DP** - Dynamic Programming
+- **#BFS** **#DFS** - Graph search techniques
+- **#구현** - Implementation/Simulation
+- **#완전탐색** - Brute force/exhaustive search
 - **#그래프** **#최단경로** - Graph problems
+- **#정렬** - Sorting algorithms
 - **#그리디** - Greedy algorithms
 - **#문자열** - String manipulation
-- **#구현** - Implementation/Simulation
 - **#수학** **#조합론** - Mathematical problems
 
 ## Code Review Focus Areas
@@ -298,29 +375,23 @@ When reviewing solutions, prioritize:
 ## Key Files to Reference
 
 ### For Adding New Problems
-- `_template/README.md` - Documentation structure to follow
-- `_template/solution.py` - Code template (pure implementation)
-- `_template/test.py` - Test cases template (modify per problem, auto-references root `_runners`)
+- `_template_programmers/` - Programmers 문제 템플릿
+- `_template_boj/` - Baekjoon 문제 템플릿
+- `_template_leetcode/` - LeetCode 문제 템플릿
 
 ### For Testing (Shared Infrastructure)
 - `_runners/` (root package) - Test execution environment (common, shared by all test.py)
-  - `__init__.py` - Package initialization (exports `run_tests`)
-  - `python.py` - Python test runner module
-    - `run_tests(func, test_cases)` function
-    - Takes solution function and test cases
-    - Measures time and memory
-    - Handles test case execution
-    - Formats output
-    - **DO NOT modify**, shared by all Python problems
-  - (future) Other language runners: `go.py`, `java.py`, etc.
+  - `__init__.py` - Package initialization
+    - `run_tests`: Programmers용 (함수 기반)
+    - `run_boj_tests`: Baekjoon용 (stdin/stdout 기반)
+    - `run_leetcode_tests`: LeetCode용 (Solution 클래스 기반)
+  - `python.py`, `boj.py`, `leetcode.py` - 각 플랫폼 러너 (**DO NOT modify**)
 
 ### Test Execution Flow
-1. Run: `cd NNN_주제_문제명 && python3 test.py`
-2. `test.py` imports `solution` from `solution.py`
-3. `test.py` imports `run_tests` from `_runners` (root package)
-4. `test.py` calls: `run_tests(solution, test_cases)`
-5. Tests run with automatic time/memory measurement
-6. Can also test alternative implementations: `run_tests(my_other_solution, test_cases)`
+1. Run: `cd 유형/플랫폼/문제명 && python3 test.py`
+2. `test.py` imports solution from `solution.py`
+3. `test.py` imports appropriate runner from `_runners`
+4. Tests run with automatic time/memory measurement
 
 ### For Project Context
 - `README.md` - Project overview and index
@@ -328,15 +399,15 @@ When reviewing solutions, prioritize:
 
 ### Separation of Concerns
 - **Modify per problem**: `README.md`, `solution.py`, `test.py` (test_cases array only)
-- **Common (shared, referenced)**: `_runners/` (root, multi-language test environment)
+- **Common (shared, referenced)**: `_runners/` (root, multi-platform test environment)
   - Single point of maintenance for test logic
-  - Easy to add new language runners
+  - Platform-specific runners for each submission site
 
 ## Guidelines for Claude
 
 When assisting with this repository:
 
-1. **Creating New Problems**: Use template structure; maintain naming convention
+1. **Creating New Problems**: Use appropriate platform template; follow `유형/플랫폼/문제명` structure
 2. **Documenting Solutions**: Emphasize process over just code; include reflections
 3. **Code Analysis**: Focus on complexity, optimization, and algorithm choice justification
 4. **Repo Maintenance**: Help update main README index when problems are added
